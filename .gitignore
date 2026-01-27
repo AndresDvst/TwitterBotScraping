@@ -1,0 +1,5 @@
+venv/
+chrome-win/
+chrome_profile/
+.vscode/
+__pycache__/
