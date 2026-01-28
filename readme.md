@@ -79,6 +79,12 @@ _Scraping seguro • Gestión de usuarios • Anti-detección avanzada_
   - Rotación automática de archivos
   - Niveles: DEBUG, INFO, WARNING, ERROR
 
+- **📋 Historial por Keywords**
+  - Registro de asignaciones por keyword (aurora/emily/eva/gaby)
+  - Validación de 3 días: no repite usuarios en el mismo keyword
+  - Permite reutilizar usuarios en diferentes keywords
+  - Trazabilidad completa de todas las asignaciones
+
 ---
 
 ## 🚀 Instalación Rápida
@@ -175,9 +181,32 @@ BOT DE GESTIÓN DE USUARIOS DE TWITTER
 
 ### 🎯 Opciones Detalladas
 
-#### Opción 1: Modificar Login JSON
+#### Opción 1: Modificar Login JSON ⭐ Mejorado
 
 Genera `login.json` con 40 usuarios aleatorios distribuidos en 4 grupos (aurora/emily/eva/gaby).
+
+**Características:**
+
+- ✅ **Validación por keyword**: No repite usuarios en el mismo keyword por 3 días
+- ✅ **Historial inteligente**: Registra cada asignación con keyword y fecha
+- ✅ **Flexibilidad**: Permite el mismo usuario en diferentes keywords
+- ✅ **Backup automático**: Crea respaldo antes de modificar
+- ✅ **Resumen detallado**: Muestra cuántos usuarios se asignaron a cada keyword
+
+**Ejemplo de uso:**
+
+```
+Selecciona una opción: 1
+
+INFO | ⚠ 5 usuarios filtrados por uso reciente en keywords
+INFO | ✓ login.json actualizado en: I:\Archivos\login.json
+INFO | 📊 Resumen de asignación:
+INFO |   - aurora: 10 usuarios
+INFO |   - emily: 10 usuarios
+INFO |   - eva: 10 usuarios
+INFO |   - gaby: 10 usuarios
+INFO |   - Total: 40 usuarios asignados
+```
 
 #### Opción 2: Scraping Automático ⭐ Recomendado
 

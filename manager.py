@@ -63,18 +63,39 @@ class UsuariosManager:
     
     def _guardar_json(self, path: str, data: List):
         """Guarda datos en un archivo JSON con backup automático"""
+        import time
         try:
             # Crear backup antes de modificar
             if os.path.exists(path):
                 self.backup_manager.create_backup(path)
             
-            # Escritura atómica (temp + rename)
+            # Intentar escritura atómica (temp + rename)
             temp_path = path + '.tmp'
             with open(temp_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             
-            os.replace(temp_path, path)
-            bot_logger.debug(f"Archivo guardado: {os.path.basename(path)} ({len(data)} items)")
+            # Intentar reemplazar con retry
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    os.replace(temp_path, path)
+                    bot_logger.debug(f"Archivo guardado: {os.path.basename(path)} ({len(data)} items)")
+                    return
+                except PermissionError:
+                    if attempt < max_retries - 1:
+                        time.sleep(0.1)  # Esperar 100ms
+                    else:
+                        # Fallback: escribir directamente (menos seguro pero funciona)
+                        bot_logger.warning(f"Usando escritura directa para {os.path.basename(path)} (archivo puede estar abierto)")
+                        with open(path, 'w', encoding='utf-8') as f:
+                            json.dump(data, f, indent=2, ensure_ascii=False)
+                        # Limpiar archivo temporal
+                        if os.path.exists(temp_path):
+                            try:
+                                os.remove(temp_path)
+                            except:
+                                pass
+                        return
             
         except Exception as e:
             log_exception(bot_logger, e, f"Error guardando {path}")
@@ -209,6 +230,47 @@ class UsuariosManager:
         bot_logger.debug(f"Estadísticas: {stats}")
         return stats
     
+    def _verificar_disponibilidad_por_keyword(self, usuario: str, keyword: str, dias: int = 3) -> bool:
+        """Verifica si un usuario puede ser asignado a un keyword (no usado en últimos X días)"""
+        try:
+            historial = self._cargar_json(self.historial_path)
+            fecha_limite = datetime.now() - timedelta(days=dias)
+            
+            for registro in historial:
+                if registro.get('usuario') == usuario and registro.get('keyword') == keyword:
+                    fecha_registro = datetime.fromisoformat(registro['fecha'])
+                    if fecha_registro > fecha_limite:
+                        return False  # Usado recientemente en este keyword
+            
+            return True  # Disponible para este keyword
+            
+        except Exception as e:
+            bot_logger.warning(f"Error verificando disponibilidad: {e}")
+            return True  # En caso de error, permitir uso
+    
+    def _registrar_asignacion_keyword(self, usuario: str, keyword: str):
+        """Registra la asignación de un usuario a un keyword en el historial"""
+        try:
+            historial = self._cargar_json(self.historial_path)
+            
+            # Agregar nuevo registro con keyword
+            nuevo_registro = {
+                'usuario': usuario,
+                'keyword': keyword,
+                'fecha': datetime.now().isoformat(),
+                'tipo': 'login_json'
+            }
+            
+            historial.append(nuevo_registro)
+            
+            # Guardar historial actualizado
+            self._guardar_json(self.historial_path, historial)
+            
+            bot_logger.debug(f"Registrado: {usuario} -> {keyword}")
+            
+        except Exception as e:
+            bot_logger.warning(f"Error registrando asignación: {e}")
+    
     def modificar_login_json(
         self, 
         usuarios_fuente: List[str], 
@@ -216,7 +278,7 @@ class UsuariosManager:
         nombres: List[str] = None, 
         total_usuarios: int = 40
     ) -> Dict:
-        """Modifica login.json con usuarios aleatorios distribuidos"""
+        """Modifica login.json con usuarios aleatorios distribuidos, evitando repeticiones por keyword"""
         destino = destino or Config.LOGIN_JSON_PATH
         
         if nombres is None:
@@ -225,30 +287,83 @@ class UsuariosManager:
         import random
         
         try:
+            # Limpiar usuarios
             usuarios_fuente = list({u.strip().replace('@', '') for u in usuarios_fuente if u and u.strip()})
             
             if len(usuarios_fuente) < total_usuarios:
                 raise ValueError(f"Se requieren al menos {total_usuarios} usuarios únicos para generar login.json")
             
-            seleccion_total = random.sample(usuarios_fuente, total_usuarios)
-            por_grupo = max(1, len(seleccion_total) // len(nombres))
-            estructura = {"keywords": {}}
-            idx = 0
+            # Filtrar usuarios por disponibilidad en cada keyword
+            usuarios_por_keyword = {}
+            usuarios_no_disponibles = set()
             
+            for nombre in nombres:
+                disponibles = [
+                    u for u in usuarios_fuente 
+                    if self._verificar_disponibilidad_por_keyword(u, nombre, dias=3)
+                ]
+                usuarios_por_keyword[nombre] = disponibles
+                
+                # Registrar cuántos no están disponibles
+                no_disponibles = set(usuarios_fuente) - set(disponibles)
+                usuarios_no_disponibles.update(no_disponibles)
+            
+            if usuarios_no_disponibles:
+                bot_logger.info(f"⚠ {len(usuarios_no_disponibles)} usuarios filtrados por uso reciente en keywords")
+            
+            # Calcular usuarios por grupo
+            por_grupo = total_usuarios // len(nombres)
+            estructura = {"keywords": {}}
+            usuarios_asignados = []
+            
+            # Asignar usuarios a cada keyword
             for i, nombre in enumerate(nombres, start=1):
-                grupo = seleccion_total[idx: idx + por_grupo]
-                idx += por_grupo
+                disponibles = usuarios_por_keyword[nombre]
+                
+                # Si no hay suficientes disponibles para este keyword, usar todos los disponibles
+                if len(disponibles) < por_grupo:
+                    bot_logger.warning(
+                        f"⚠ Keyword '{nombre}': solo {len(disponibles)} usuarios disponibles "
+                        f"(necesarios: {por_grupo}). Usando todos los disponibles."
+                    )
+                    grupo = disponibles
+                else:
+                    grupo = random.sample(disponibles, por_grupo)
+                
                 estructura["keywords"][str(i)] = {
                     "name": nombre,
                     "keywords": grupo
                 }
+                
+                usuarios_asignados.extend(grupo)
+                
+                # Registrar asignaciones en historial
+                for usuario in grupo:
+                    self._registrar_asignacion_keyword(usuario, nombre)
             
-            # Si quedaron usuarios sin asignar, distribuirlos
-            restantes = seleccion_total[idx:]
-            if restantes:
-                for r in restantes:
-                    clave = str(random.randint(1, len(nombres)))
-                    estructura["keywords"][clave]["keywords"].append(r)
+            # Si faltan usuarios para completar total_usuarios, agregar de los disponibles
+            faltantes = total_usuarios - len(usuarios_asignados)
+            if faltantes > 0:
+                # Buscar usuarios que no se hayan asignado aún
+                usuarios_restantes = [u for u in usuarios_fuente if u not in usuarios_asignados]
+                
+                if usuarios_restantes:
+                    adicionales = random.sample(
+                        usuarios_restantes, 
+                        min(faltantes, len(usuarios_restantes))
+                    )
+                    
+                    # Distribuir adicionales aleatoriamente
+                    for usuario in adicionales:
+                        clave = str(random.randint(1, len(nombres)))
+                        nombre_keyword = estructura["keywords"][clave]["name"]
+                        estructura["keywords"][clave]["keywords"].append(usuario)
+                        self._registrar_asignacion_keyword(usuario, nombre_keyword)
+                        usuarios_asignados.append(usuario)
+            
+            # Crear backup antes de modificar
+            if os.path.exists(destino):
+                self.backup_manager.create_backup(destino)
             
             # Escribir formato lateral
             lines = ["{", '  "keywords": {']
@@ -267,7 +382,15 @@ class UsuariosManager:
             with open(destino, "w", encoding="utf-8") as f:
                 f.write("\n".join(lines))
             
-            bot_logger.info(f"login.json actualizado en: {destino} ({total_usuarios} usuarios)")
+            # Resumen de asignación
+            bot_logger.info(f"✓ login.json actualizado en: {destino}")
+            bot_logger.info(f"📊 Resumen de asignación:")
+            for clave, entry in estructura["keywords"].items():
+                nombre = entry["name"]
+                cantidad = len(entry["keywords"])
+                bot_logger.info(f"  - {nombre}: {cantidad} usuarios")
+            bot_logger.info(f"  - Total: {len(usuarios_asignados)} usuarios asignados")
+            
             return estructura
             
         except Exception as e:
