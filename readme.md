@@ -1,4 +1,4 @@
-# Twitter Bot Scraping
+# 🤖 Twitter Bot Scraping
 
 <div align="center">
 <a href="https://wa.me/+573001234567?text=Hola%20desde%20BotCryptoV2%20🚀" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" /></a>
@@ -10,114 +10,480 @@
 <a href="https://discord.com/users/1133809866130067476" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" /></a>
 </div>
 
-Bot en Python para interactuar con el feed de X/Twitter, extraer usuarios y dar likes de forma segura y más humana mediante Selenium. Incluye:
-- Menú CLI para operaciones comunes
-- Sesión persistente con perfil de Chrome propio
-- Extracción inteligente de usuarios y likes con saltos por elementos
-- Gestión de usuarios: base principal, historial, repetidos
-- Generación de login.json con estructura lateral
+<br>
 
-## Características
-- Scraping manual o automático por intervalos con métricas agregadas
-- Like inteligente: identifica tweet actual, da like y salta 2–6 publicaciones
-- Evita repetición inmediata de likes con un conjunto de tweets procesados
-- Persistencia de sesión con un perfil local dedicado y apertura en ventana nueva
-- Utilidades para:
-  - Obtener 10 usuarios únicos en los últimos 3 días
-  - Agregar usuarios nuevos evitando duplicados
-  - Limpiar historial anterior a X días
-  - Construir login.json con 40 usuarios aleatorios distribuidos en 4 grupos
+<div align="center">
 
-## Arquitectura y Flujo
-- Entrada principal: [bot.py](file:///Twitter%20Bot%20Scraping/bot.py)
-- Lógica de scraping: [scraper.py](file:///Twitter%20Bot%20Scraping/scraper.py)
-- Gestión y persistencia: [manager.py](file:///Twitter%20Bot%20Scraping/manager.py)
+**Bot profesional en Python para automatización inteligente de X/Twitter**
 
-Flujo típico:
-- Ejecutar menú
-- Abrir navegador con perfil persistente en ventana nueva
-- Navegar a https://x.com/home, iniciar sesión si es necesario
-- Ejecutar pasada de scraping (scroll inicial + extracción/likes)
-- Registrar nuevos usuarios y estadísticas
+_Scraping seguro • Gestión de usuarios • Anti-detección avanzada_
 
-## Requisitos
-- Python 3.10+ recomendado
-- Google Chrome/Chromium instalado
-- ChromeDriver local disponible en: \Twitter Bot Scraping\chrome-win\chromedriver.exe`
-- Dependencias Python:
-  - selenium==4.16.0
-  - webdriver-manager==4.0.1
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Selenium](https://img.shields.io/badge/Selenium-4.16.0-green.svg)](https://www.selenium.dev/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Instalación
-1. Crear entorno virtual:
-   
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate
+</div>
+
+---
+
+## 📋 Tabla de Contenidos
+
+- [✨ Características](#-características)
+- [🚀 Instalación Rápida](#-instalación-rápida)
+- [⚙️ Configuración](#️-configuración)
+- [💻 Uso](#-uso)
+- [🏗️ Arquitectura](#️-arquitectura)
+- [🛡️ Anti-Detección](#️-anti-detección)
+- [📊 Estructura de Datos](#-estructura-de-datos)
+- [🔧 Características Técnicas](#-características-técnicas)
+- [📝 Buenas Prácticas](#-buenas-prácticas)
+- [🤝 Contribuir](#-contribuir)
+
+---
+
+## ✨ Características
+
+### 🎯 Funcionalidades Principales
+
+- **🔄 Scraping Inteligente**: Extracción automática de usuarios con likes estratégicos
+- **💙 Likes Automatizados**: Sistema inteligente que evita detección con saltos aleatorios (2-6 tweets)
+- **👥 Gestión de Usuarios**: Base de datos completa con historial y detección de duplicados
+- **🕐 Modo Automático**: Ejecución programada cada 10 minutos durante 1 hora
+- **📊 Estadísticas Detalladas**: Métricas en tiempo real de usuarios y actividad
+- **🔐 Sesión Persistente**: Perfil de Chrome dedicado para mantener login
+
+### 🛡️ Sistema de Protección Profesional
+
+- **🎭 Anti-Detección Avanzada**
+  - User-Agent aleatorio en cada sesión
+  - Pausas con distribución normal (comportamiento humano)
+  - Scrolls con distancia variable
+  - Modificación de `navigator.webdriver`
+- **⚡ Rate Limiting Automático**
+  - Monitoreo de likes por hora
+  - Pausa automática al alcanzar límites
+  - Configurable según necesidades
+
+- **💾 Sistema de Backups**
+  - Backup automático antes de modificar datos
+  - Rotación de backups (mantiene últimos 10)
+  - Restauración fácil en caso de error
+
+- **🔄 Checkpoints**
+  - Guardado automático de estado
+  - Recuperación ante interrupciones
+  - Reanudación desde último punto
+
+- **📝 Logging Profesional**
+  - Logs con colores en consola
+  - Rotación automática de archivos
+  - Niveles: DEBUG, INFO, WARNING, ERROR
+
+---
+
+## 🚀 Instalación Rápida
+
+### 1️⃣ Clonar Repositorio
+
+```bash
+git clone https://github.com/AndresDvst/Twitter-Bot-Scraping.git
+cd Twitter-Bot-Scraping
+```
+
+### 2️⃣ Crear Entorno Virtual
+
+```bash
+python -m venv venv
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # Linux/Mac
+```
+
+### 3️⃣ Instalar Dependencias
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4️⃣ Verificar Instalación
+
+```bash
+python verificar_instalacion.py
+```
+
+---
+
+## ⚙️ Configuración
+
+### Configuración Básica (Opcional)
+
+Copia el archivo de ejemplo y personaliza según tus necesidades:
+
+```bash
+copy .env.example .env
+notepad .env  # Editar configuración
+```
+
+### Variables de Entorno Principales
+
+```env
+# Scraping
+USUARIOS_POR_PASADA=10
+LIKES_POR_PASADA=10
+INTERVALO_MINUTOS=10
+
+# Seguridad
+MAX_LIKES_PER_HOUR=50
+MAX_LIKES_PER_DAY=200
+
+# Logging
+LOG_LEVEL=INFO
+
+# Anti-Detección
+MIN_PAUSE_SECONDS=2.0
+MAX_PAUSE_SECONDS=5.0
+MIN_POST_LIKE_WAIT=5.0
+MAX_POST_LIKE_WAIT=8.0
+```
+
+> **Nota**: Si no creas `.env`, el bot usará valores por defecto sensatos.
+
+---
+
+## 💻 Uso
+
+### Ejecutar el Bot
+
+```bash
+python bot.py
+```
+
+### Menú Principal
+
+```
+==================================================
+BOT DE GESTIÓN DE USUARIOS DE TWITTER
+==================================================
+
+1. Modificar JSON de login (usuarios aleatorios)
+2. Iniciar scraping automático (1 hora, cada 10 min)
+3. Scraping manual (una sola pasada)
+4. Ver estadísticas
+5. Limpiar historial antiguo (>30 días)
+6. Salir
+==================================================
+```
+
+### 🎯 Opciones Detalladas
+
+#### Opción 1: Modificar Login JSON
+
+Genera `login.json` con 40 usuarios aleatorios distribuidos en 4 grupos (aurora/emily/eva/gaby).
+
+#### Opción 2: Scraping Automático ⭐ Recomendado
+
+- Duración: 1 hora
+- Intervalo: cada 10 minutos
+- Total: 6 pasadas
+- Likes por pasada: 10
+- **Recarga automática de página** entre pasadas
+
+#### Opción 3: Scraping Manual
+
+Una sola pasada para pruebas rápidas.
+
+#### Opción 4: Estadísticas
+
+Muestra métricas del sistema:
+
+- Total usuarios en base principal
+- Usuarios en historial
+- Usuarios repetidos detectados
+
+#### Opción 5: Limpiar Historial
+
+Elimina registros antiguos (>30 días) para mantener la base limpia.
+
+---
+
+## 🏗️ Arquitectura
+
+### Estructura del Proyecto
+
+```
+Twitter-Bot-Scraping/
+├── 📄 Archivos Principales
+│   ├── bot.py                    # Punto de entrada (CLI)
+│   ├── scraper.py                # Lógica de scraping
+│   ├── manager.py                # Gestión de usuarios
+│   ├── config.py                 # Configuración centralizada
+│   ├── logger.py                 # Sistema de logging
+│   ├── utils.py                  # Utilidades y errores
+│   ├── backup.py                 # Sistema de backups
+│   ├── checkpoint.py             # Sistema de checkpoints
+│   └── verificar_instalacion.py # Script de verificación
+│
+├── ⚙️ Configuración
+│   ├── .env.example              # Plantilla de configuración
+│   ├── .env                      # Tu configuración (no versionar)
+│   ├── requirements.txt          # Dependencias Python
+│   └── .gitignore                # Archivos ignorados
+│
+├── 📂 Datos (generados automáticamente)
+│   ├── data/
+│   │   ├── usuarios_principales.json
+│   │   ├── usuarios_base.json
+│   │   ├── historial_entregados.json
+│   │   └── usuarios_repetidos.json
+│   ├── logs/                     # Logs del bot
+│   ├── backups/                  # Backups automáticos
+│   └── chrome_profile/           # Perfil de Chrome
+│
+└── 🔧 Herramientas
+    └── chrome-win/
+        └── chromedriver.exe      # Driver de Chrome
+```
+
+### Flujo de Ejecución
+
+```mermaid
+graph TD
+    A[Inicio] --> B[Iniciar Navegador]
+    B --> C[Navegar a X/Twitter]
+    C --> D{Login OK?}
+    D -->|No| E[Login Manual]
+    E --> F[Confirmar]
+    D -->|Sí| F
+    F --> G[Scraping Feed]
+    G --> H[Scroll + Extracción]
+    H --> I[Dar Likes]
+    I --> J[Guardar Usuarios]
+    J --> K{Más Pasadas?}
+    K -->|Sí| L[Esperar Intervalo]
+    L --> M[Recargar Página]
+    M --> G
+    K -->|No| N[Fin]
+```
+
+---
+
+## 🛡️ Anti-Detección
+
+### Técnicas Implementadas
+
+#### 🎭 Comportamiento Humano
+
+- **Pausas Naturales**: Distribución normal en lugar de tiempos fijos
+- **Scrolls Variables**: Distancia aleatoria (600-1000px)
+- **Saltos Inteligentes**: 2-6 tweets entre cada like
+- **Recarga de Página**: Entre pasadas para simular navegación real
+
+#### 🔐 Ofuscación
+
+- **User-Agent Aleatorio**: Cambia en cada sesión
+- **Navigator.webdriver**: Modificado vía CDP
+- **Perfil Persistente**: Sesión real de Chrome
+
+#### ⏱️ Rate Limiting
+
+```python
+MAX_LIKES_PER_HOUR=50   # Límite por hora
+MAX_LIKES_PER_DAY=200   # Límite diario
+```
+
+El bot pausa automáticamente si detecta exceso de actividad.
+
+---
+
+## 📊 Estructura de Datos
+
+### `usuarios_principales.json`
+
+```json
+["usuario1", "usuario2", "usuario3"]
+```
+
+### `historial_entregados.json`
+
+```json
+[
+  {
+    "usuario": "usuario1",
+    "fecha": "2026-01-27T20:30:00"
+  }
+]
+```
+
+### `usuarios_repetidos.json`
+
+```json
+[
+  {
+    "usuario": "usuario_duplicado",
+    "fecha": "2026-01-27T21:00:00"
+  }
+]
+```
+
+### `login.json` (generado)
+
+```json
+{
+  "aurora": ["user1", "user2", ...],
+  "emily": ["user11", "user12", ...],
+  "eva": ["user21", "user22", ...],
+  "gaby": ["user31", "user32", ...]
+}
+```
+
+---
+
+## 🔧 Características Técnicas
+
+### Tecnologías Utilizadas
+
+- **Python 3.10+**: Lenguaje principal
+- **Selenium 4.16.0**: Automatización del navegador
+- **python-dotenv**: Gestión de variables de entorno
+- **rich**: CLI con colores y formato
+- **pydantic**: Validación de datos
+
+### Módulos Principales
+
+#### `scraper.py` - Motor de Scraping
+
+```python
+class TwitterScraper:
+    def extraer_y_dar_likes_inteligente(self, cantidad=10)
+    def mantener_sesion_activa(self, minutos=60)
+    def hacer_scroll(self, scrolls=3)
+```
+
+#### `manager.py` - Gestión de Datos
+
+```python
+class UsuariosManager:
+    def agregar_nuevos_usuarios(self, usuarios)
+    def obtener_10_usuarios(self)
+    def modificar_login_json(self, total_usuarios=40)
+```
+
+#### `config.py` - Configuración
+
+```python
+class Config:
+    # Rutas, parámetros, límites, etc.
+    @classmethod
+    def validate(cls) -> bool
+```
+
+---
+
+## 📝 Buenas Prácticas
+
+### ✅ Recomendaciones
+
+1. **Configuración Conservadora**
+
+   ```env
+   MAX_LIKES_PER_HOUR=30
+   LIKES_POR_PASADA=5
+   MIN_POST_LIKE_WAIT=8.0
    ```
 
-2. Instalar dependencias:
-   
+2. **Monitoreo de Logs**
+
    ```bash
-   pip install -r requirements.txt
+   # Ver logs en tiempo real
+   Get-Content logs\bot.log -Wait -Tail 50
    ```
 
-3. Verificar ChromeDriver:
-   - Asegura que exista `chrome-win/chromedriver.exe` en el proyecto, o ajusta la ruta en [scraper.py:L53-L61](file:///Twitter%20Bot%20Scraping/scraper.py#L53-L61).
-   - Alternativa: migrar a webdriver-manager para descarga automática (ya incluido en requirements).
+3. **Backups Regulares**
+   - Los backups se crean automáticamente
+   - Revisa `backups/` periódicamente
 
-## Uso
-1. Ejecutar el menú:
-   
-   ```bash
-   python Twitter Bot Scraping\bot.py
-   ```
+4. **Limpieza de Historial**
+   - Ejecuta opción 5 mensualmente
+   - Mantiene la base de datos limpia
 
-2. Opciones:
-   - 1: Modificar login.json con 40 usuarios aleatorios distribuidos en aurora/emily/eva/gaby
-   - 2: Scraping automático por 1 hora (cada 10 minutos)
-   - 3: Scraping manual (una pasada)
-   - 4: Ver estadísticas
-   - 5: Limpiar historial (>30 días)
+### ⚠️ Precauciones
 
-3. Primer uso:
-   - El bot abre Chrome; inicia sesión manualmente en X si no lo estás.
-   - Confirma en la terminal para continuar con el scraping.
+- **No abuses de los límites**: Twitter puede detectar actividad anormal
+- **Usa pausas largas**: Más seguro = menos detección
+- **Revisa logs**: Identifica problemas temprano
+- **Mantén actualizado**: Instala actualizaciones regularmente
 
-## Puntos Clave Técnicos
-- Apertura en ventana limpia con perfil persistente: [iniciar_navegador](file:///Twitter%20Bot%20Scraping/scraper.py#L16-L68), [asegurar_ventana_unica](file:///Twitter%20Bot%20Scraping/scraper.py#L83-L105)
-- Scroll humano y extracción/likes con saltos por elementos: [scrapear_feed](file:///Twitter%20Bot%20Scraping/scraper.py#L378-L395), [extraer_y_dar_likes_inteligente](file:///Twitter%20Bot%20Scraping/scraper.py#L122-L320)
-- Persistencia y utilidades de usuarios: [UsuariosManager](file:///Twitter%20Bot%20Scraping/manager.py#L6-L177)
-- Generación de login.json lateral (40 usuarios): [modificar_json_login](file:///Twitter%20Bot%20Scraping/manager.py#L140-L177) y llamada desde [bot.py](file:///Twitter%20Bot%20Scraping/bot.py#L45-L55)
+---
 
-## Estructura de Datos
-- data/usuarios_principales.json: lista base de usuarios
-- data/historial_entregados.json: registros de entregas con fecha
-- data/usuarios_repetidos.json: duplicados detectados con timestamp
-- Twitter Bot Scraping\login.json: estructura lateral con 4 grupos y 40 usuarios
+## 🐛 Solución de Problemas
 
-## Limpieza de Archivos Obsoletos
-Para un repositorio más limpio y portable, se recomienda excluir/eliminar archivos generados por Chrome y datos de perfil. Mantén únicamente lo imprescindible:
-- Mantener:
-  - `chrome-win/chromedriver.exe` (driver necesario si no usas webdriver-manager)
-  - Archivos `.py` del proyecto y `requirements.txt`
-  - `data/*.json` propios del bot
-- Eliminar o ignorar (caché/perfil/bundles de Chrome):
-  - `chrome-win/locales/*` y recursos como `MEIPreload`, `PrivacySandboxAttestationsPreloaded`, `IwaKeyDistribution`, `vk_swiftshader_icd.json`
-  - `chrome_profile/**` contenido (LevelDB, LOG, manifests, CaptchaProviders, Crowd Deny, etc.). Mantén la carpeta vacía si quieres conservar la ruta del perfil.
-  - Cualquier archivo `LOG`, `LOG.old`, `.pb` dentro de `chrome_profile/Default/**`
+### Error: "ModuleNotFoundError"
 
-Sugerencia: añade estas rutas a `.gitignore` si versionas el proyecto.
+```bash
+pip install -r requirements.txt
+```
 
-## Buenas Prácticas
-- Evitar likes consecutivos: el bot salta entre 2–6 publicaciones tras cada like
-- Mantener pausas aleatorias y scroll humano para reducir detección
-- Mantener el perfil dedicado en `chrome_profile/` para persistencia, pero no versionar su contenido
-- Considerar migrar a `webdriver-manager` para descarga/gestión automática del driver
+### Error: "ChromeDriver not found"
 
-## Créditos
-- Selenium WebDriver
-- Estructura inspirada en guías profesionales de automatización y bots CLI
+El bot descargará automáticamente ChromeDriver con `webdriver-manager`.
+
+### Logs no se crean
+
+```bash
+mkdir logs
+python bot.py
+```
+
+### Rate limit alcanzado
+
+El bot pausará automáticamente. Ajusta en `.env`:
+
+```env
+MAX_LIKES_PER_HOUR=30
+```
+
+---
+
+## 📈 Roadmap
+
+### Próximas Mejoras
+
+- [ ] Exportación a CSV/Excel
+- [ ] Dashboard web con Flask
+- [ ] Análisis de engagement
+- [ ] Scheduler integrado
+- [ ] Modo stealth avanzado
+- [ ] Tests unitarios
+- [ ] Documentación con Sphinx
+
+---
+
+## 🤝 Contribuir
+
+¡Las contribuciones son bienvenidas! Si tienes ideas o mejoras:
+
+1. Fork el proyecto
+2. Crea una rama (`git checkout -b feature/mejora`)
+3. Commit tus cambios (`git commit -m 'feat: nueva característica'`)
+4. Push a la rama (`git push origin feature/mejora`)
+5. Abre un Pull Request
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
+
+---
+
+## 🙏 Créditos
+
+- **Selenium WebDriver**: Framework de automatización
+- **Python Community**: Librerías y herramientas
+- **Inspiración**: Guías profesionales de automatización y bots CLI
+
+---
+
+## 📞 Contacto
 
 <div align="center">
 <a href="https://wa.me/+573001234567?text=Hola%20desde%20BotCryptoV2%20🚀" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" /></a>
@@ -129,3 +495,12 @@ Sugerencia: añade estas rutas a `.gitignore` si versionas el proyecto.
 <a href="https://discord.com/users/1133809866130067476" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" /></a>
 </div>
 
+<br>
+
+<div align="center">
+
+**⭐ Si te gusta este proyecto, dale una estrella en GitHub ⭐**
+
+_Hecho con ❤️ por [AndresDvst](https://github.com/AndresDvst)_
+
+</div>
