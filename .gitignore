@@ -1,5 +1,40 @@
+# Python
 venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Chrome/Browser
 chrome-win/
 chrome_profile/
-.vscode/
-__pycache__/
+
+# Configuración sensible
+.env
+*.env.local
+
+# Logs
+logs/
+*.log
+
+# Backups
+backups/
+
+# Data (opcional - descomenta si no quieres versionar datos)
+# data/*.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporal
+*.tmp
+*.temp

@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """
-Bot de gestión de usuarios de Twitter
-Funcionalidades:
-1. Entregar 10 usuarios aleatorios sin repetir en 3 días
-2. Scrapear feed de Twitter cada 10 min por 1 hora
-3. Agregar usuarios al JSON principal
-4. Detectar y registrar repetidos
+Bot de gestión de usuarios de Twitter con CLI mejorado
 """
 
 from manager import UsuariosManager
 from scraper import TwitterScraper
+from logger import bot_logger, log_exception
+from config import Config
 import sys
+
 
 def mostrar_menu():
     """Muestra el menú principal"""
@@ -25,34 +23,47 @@ def mostrar_menu():
     print("6. Salir")
     print("\n" + "="*50)
 
+
 def obtener_usuarios_aleatorios():
     """Opción 1: Obtener 10 usuarios"""
-    manager = UsuariosManager()
-    usuarios = manager.obtener_10_usuarios()
-    
-    print("\n" + "="*50)
-    print("USUARIOS SELECCIONADOS:")
-    print("="*50)
-    
-    if usuarios:
-        for i, usuario in enumerate(usuarios, 1):
-            print(f"{i}. @{usuario}")
-    else:
-        print("⚠ No hay usuarios disponibles que no se hayan usado en los últimos 3 días")
-    
-    print("="*50 + "\n")
+    try:
+        manager = UsuariosManager()
+        usuarios = manager.obtener_10_usuarios()
+        
+        print("\n" + "="*50)
+        print("USUARIOS SELECCIONADOS:")
+        print("="*50)
+        
+        if usuarios:
+            for i, usuario in enumerate(usuarios, 1):
+                print(f"{i}. @{usuario}")
+        else:
+            print("⚠ No hay usuarios disponibles que no se hayan usado en los últimos 3 días")
+        
+        print("="*50 + "\n")
+        
+    except Exception as e:
+        log_exception(bot_logger, e, "Error obteniendo usuarios aleatorios")
+        print(f"\n✗ Error: {e}\n")
+
 
 def modificar_json_login():
-    """Opción 1: Modificar Twitter Bot Scraping\\login.json con 40 usuarios aleatorios"""
-    import os
-    manager = UsuariosManager()
+    """Opción 1: Modificar login.json con 40 usuarios aleatorios"""
     try:
+        manager = UsuariosManager()
         usuarios_fuente = manager.cargar_usuarios_base()
-        destino_login = r"Twitter Bot Scraping\login.json"
-        manager.modificar_login_json(usuarios_fuente=usuarios_fuente, destino=destino_login, total_usuarios=40)
+        
+        manager.modificar_login_json(
+            usuarios_fuente=usuarios_fuente,
+            total_usuarios=40
+        )
+        
         print("\n✓ login.json actualizado con 40 usuarios aleatorios distribuidos en aurora/emily/eva/gaby")
+        
     except Exception as e:
+        log_exception(bot_logger, e, "Error modificando login.json")
         print(f"\n✗ Error modificando login.json: {e}")
+
 
 def iniciar_scraping_automatico():
     """Opción 2: Scraping automático durante 1 hora"""
@@ -72,6 +83,7 @@ def iniciar_scraping_automatico():
     scraper = TwitterScraper(headless=False)
     
     try:
+        bot_logger.info("Iniciando scraping automático...")
         scraper.iniciar_navegador()
         
         print("\n⏸ PAUSA: El navegador está abierto.")
@@ -87,18 +99,21 @@ def iniciar_scraping_automatico():
         
         # Iniciar scraping automático con likes
         scraper.mantener_sesion_activa(
-            minutos=60,
-            intervalo_minutos=10,
-            usuarios_por_pasada=10,
-            likes_por_pasada=10
+            minutos=Config.DURACION_TOTAL_MINUTOS,
+            intervalo_minutos=Config.INTERVALO_MINUTOS,
+            usuarios_por_pasada=Config.USUARIOS_POR_PASADA,
+            likes_por_pasada=Config.LIKES_POR_PASADA
         )
         
     except KeyboardInterrupt:
+        bot_logger.warning("Proceso interrumpido por el usuario")
         print("\n\n⚠ Proceso interrumpido por el usuario")
     except Exception as e:
+        log_exception(bot_logger, e, "Error en scraping automático")
         print(f"\n✗ Error: {e}")
     finally:
         scraper.cerrar()
+
 
 def scraping_manual():
     """Opción 3: Una sola pasada de scraping"""
@@ -107,6 +122,7 @@ def scraping_manual():
     manager = UsuariosManager()
     
     try:
+        bot_logger.info("Iniciando scraping manual...")
         scraper.iniciar_navegador()
         
         print("\n⏸ PAUSA: El navegador está abierto.")
@@ -120,12 +136,12 @@ def scraping_manual():
         print("Presiona ENTER cuando estés listo...")
         input()
         
-        # Hacer una pasada (ahora retorna tupla)
+        # Hacer una pasada
         usuarios, likes_dados = scraper.scrapear_feed(
-            scrolls=10,  # 10 scrolls para cargar más contenido
-            usuarios_objetivo=10,
+            scrolls=Config.SCROLL_COUNT,
+            usuarios_objetivo=Config.USUARIOS_POR_PASADA,
             dar_likes_activo=True,
-            likes_objetivo=10
+            likes_objetivo=Config.LIKES_POR_PASADA
         )
         
         # Agregar al manager
@@ -138,33 +154,50 @@ def scraping_manual():
         print(f"  - Likes dados: {likes_dados} 💙")
         
     except Exception as e:
+        log_exception(bot_logger, e, "Error en scraping manual")
         print(f"\n✗ Error: {e}")
     finally:
         scraper.cerrar()
 
+
+
 def ver_estadisticas():
     """Opción 4: Mostrar estadísticas"""
-    manager = UsuariosManager()
-    stats = manager.obtener_estadisticas()
-    
-    print("\n" + "="*50)
-    print("ESTADÍSTICAS DEL SISTEMA")
-    print("="*50)
-    print(f"Total usuarios en base principal: {stats['total_principales']}")
-    print(f"Total en historial (últimos 30 días): {stats['total_historial']}")
-    print(f"Total usuarios repetidos detectados: {stats['total_repetidos']}")
-    print(f"Total en base inicial: {stats['total_base']}")
-    print("="*50 + "\n")
+    try:
+        manager = UsuariosManager()
+        stats = manager.obtener_estadisticas()
+        
+        print("\n" + "="*50)
+        print("ESTADÍSTICAS DEL SISTEMA")
+        print("="*50)
+        print(f"Total usuarios en base principal: {stats['total_principales']}")
+        print(f"Total en historial (últimos 30 días): {stats['total_historial']}")
+        print(f"Total usuarios repetidos detectados: {stats['total_repetidos']}")
+        print(f"Total en base inicial: {stats['total_base']}")
+        print("="*50 + "\n")
+        
+    except Exception as e:
+        log_exception(bot_logger, e, "Error obteniendo estadísticas")
+        print(f"\n✗ Error: {e}\n")
+
 
 def limpiar_historial():
     """Opción 5: Limpiar historial antiguo"""
-    manager = UsuariosManager()
-    eliminados = manager.limpiar_historial_antiguo(dias=30)
-    
-    print(f"\n✓ Se eliminaron {eliminados} entradas del historial (>30 días)")
+    try:
+        manager = UsuariosManager()
+        eliminados = manager.limpiar_historial_antiguo()
+        
+        print(f"\n✓ Se eliminaron {eliminados} entradas del historial (>30 días)")
+        
+    except Exception as e:
+        log_exception(bot_logger, e, "Error limpiando historial")
+        print(f"\n✗ Error: {e}")
+
 
 def main():
     """Función principal"""
+    bot_logger.info("Bot iniciado")
+    
     while True:
         mostrar_menu()
         
@@ -183,15 +216,20 @@ def main():
                 limpiar_historial()
             elif opcion == '6':
                 print("\n¡Hasta luego! 👋\n")
+                bot_logger.info("Bot finalizado por el usuario")
                 sys.exit(0)
             else:
                 print("\n⚠ Opción inválida. Intenta de nuevo.")
                 
         except KeyboardInterrupt:
             print("\n\n¡Hasta luego! 👋\n")
+            bot_logger.info("Bot interrumpido por el usuario")
             sys.exit(0)
         except Exception as e:
+            log_exception(bot_logger, e, "Error inesperado en main loop")
             print(f"\n✗ Error inesperado: {e}\n")
+
 
 if __name__ == "__main__":
     main()
+
